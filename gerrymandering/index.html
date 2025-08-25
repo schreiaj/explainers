@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>What's up with gerrymandering?</title>
+    <meta name="description" content="Let's play with elections...">
+    <script type="module" src="index.js"></script>
+    <!-- Pico.css -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tufte-css@1.7.2/tufte.min.css">
+
+
+    <style>
+        .district-container-with-election-list {
+            --election-list-flex-direction: row;
+            --election-list-flex-wrap: wrap;
+            --election-list-gap: 5px;
+            --election-list-align-items: left;
+            --election-list-justify-content: center;
+            --rep-color: #f4a4a4;
+            --dem-color: #adadf5;
+            --tossup-color: #808080;
+            /* min-height:60px; */
+            padding-right: 10%;
+            --district-size: 30px;
+            --election-list-gap: 5px;
+        }
+
+        .district-container-label {
+            margin-top: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .group {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .group h3 {
+            margin: 0;
+        }
+        
+        .group .r-d-section {
+            display: flex;
+            gap: 20px;
+        }
+    </style>
+    <script>
+        const updateDistrictSwings = (biases) => {
+            let districtSwings = Array.from({ length: biases.length }, () => Math.random() * 100 - 50)
+            return districtSwings;
+        }
+        const districtBiases = [
+            {
+                "Dist": "WY-AL",
+                "Bias": 23
+            },
+            {
+                "Dist": "WV-02",
+                "Bias": 20
+            },
+            {
+                "Dist": "WV-01",
+                "Bias": 22
+            },
+            {
+                "Dist": "WI-08",
+                "Bias": 8
+            },
+            {
+                "Dist": "WI-07",
+                "Bias": 11
+            },
+            {
+                "Dist": "WI-06",
+                "Bias": 8
+            },
+            {
+                "Dist": "WI-05",
+                "Bias": 11
+            },
+            {
+                "Dist": "WI-04",
+                "Bias": -26
+            },
+            {
+                "Dist": "WI-03",
+                "Bias": 3
+            },
+            {
+                "Dist": "WI-02",
+                "Bias": -21
+            },
+            {
+                "Dist": "WI-01",
+                "Bias": 2
+            },
+            {
+                "Dist": "WA-10",
+                "Bias": -9
+            },
+            {
+                "Dist": "WA-09",
+                "Bias": -22
+            },
+            {
+                "Dist": "WA-08",
+                "Bias": -3
+            },
+            {
+                "Dist": "WA-07",
+                "Bias": -39
+            },
+            {
+                "Dist": "WA-06",
+                "Bias": -10
+            },
+            {
+                "Dist": "WA-05",
+                "Bias": 5
+            },
+            {
+                "Dist": "WA-04",
+                "Bias": 10
+            },
+            {
+                "Dist": "WA-03",
+                "Bias": 2
+            },
+            {
+                "Dist": "WA-02",
+                "Bias": -12
+            },
+            {
+                "Dist": "WA-01",
+                "Bias": -15
+            },
+            {
+                "Dist": "VT-AL",
+                "Bias": -17
+            },
+            {
+                "Dist": "VA-11",
+                "Bias": -18
+            },
+            {
+                "Dist": "VA-10",
+                "Bias": -6
+            },
+            {
+                "Dist": "VA-09",
+                "Bias": 22
+            },
+            {
+                "Dist": "VA-08",
+                "Bias": -26
+            },
+            {
+                "Dist": "VA-07",
+                "Bias": -2
+            },
+            {
+                "Dist": "VA-06",
+                "Bias": 12
+            },
+            {
+                "Dist": "VA-05",
+                "Bias": 6
+            },
+            {
+                "Dist": "VA-04",
+                "Bias": -17
+            },
+            {
+                "Dist": "VA-03",
+                "Bias": -18
+            },
+            {
+                "Dist": "VA-02",
+                "Bias": 0
+            },
+            {
+                "Dist": "VA-01",
+                "Bias": 3
+            },
+            {
+                "Dist": "UT-04",
+                "Bias": 14
+            },
+            {
+                "Dist": "UT-03",
+                "Bias": 10
+            },
+            {
+                "Dist": "UT-02",
+                "Bias": 10
+            },
+            {
+                "Dist": "UT-01",
+                "Bias": 10
+            },
+            {
+                "Dist": "TX-38",
+                "Bias": 10
+            },
+            {
+                "Dist": "TX-37",
+                "Bias": -26
+            },
+            {
+                "Dist": "TX-36",
+                "Bias": 18
+            },
+            {
+                "Dist": "TX-35",
+                "Bias": -19
+            },
+            {
+                "Dist": "TX-34",
+                "Bias": 0
+            },
+            {
+                "Dist": "TX-33",
+                "Bias": -19
+            },
+            {
+                "Dist": "TX-32",
+                "Bias": -13
+            },
+            {
+                "Dist": "TX-31",
+                "Bias": 11
+            },
+            {
+                "Dist": "TX-30",
+                "Bias": -25
+            },
+            {
+                "Dist": "TX-29",
+                "Bias": -12
+            },
+            {
+                "Dist": "TX-28",
+                "Bias": 2
+            },
+            {
+                "Dist": "TX-27",
+                "Bias": 14
+            },
+            {
+                "Dist": "TX-26",
+                "Bias": 11
+            },
+            {
+                "Dist": "TX-25",
+                "Bias": 18
+            },
+            {
+                "Dist": "TX-24",
+                "Bias": 7
+            },
+            {
+                "Dist": "TX-23",
+                "Bias": 7
+            },
+            {
+                "Dist": "TX-22",
+                "Bias": 9
+            },
+            {
+                "Dist": "TX-21",
+                "Bias": 11
+            },
+            {
+                "Dist": "TX-20",
+                "Bias": -12
+            },
+            {
+                "Dist": "TX-19",
+                "Bias": 25
+            },
+            {
+                "Dist": "TX-18",
+                "Bias": -21
+            },
+            {
+                "Dist": "TX-17",
+                "Bias": 14
+            },
+            {
+                "Dist": "TX-16",
+                "Bias": -11
+            },
+            {
+                "Dist": "TX-15",
+                "Bias": 7
+            },
+            {
+                "Dist": "TX-14",
+                "Bias": 17
+            },
+            {
+                "Dist": "TX-13",
+                "Bias": 24
+            },
+            {
+                "Dist": "TX-12",
+                "Bias": 11
+            },
+            {
+                "Dist": "TX-11",
+                "Bias": 22
+            },
+            {
+                "Dist": "TX-10",
+                "Bias": 12
+            },
+            {
+                "Dist": "TX-09",
+                "Bias": -24
+            },
+            {
+                "Dist": "TX-08",
+                "Bias": 16
+            },
+            {
+                "Dist": "TX-07",
+                "Bias": -12
+            },
+            {
+                "Dist": "TX-06",
+                "Bias": 14
+            },
+            {
+                "Dist": "TX-05",
+                "Bias": 13
+            },
+            {
+                "Dist": "TX-04",
+                "Bias": 16
+            },
+            {
+                "Dist": "TX-03",
+                "Bias": 10
+            },
+            {
+                "Dist": "TX-02",
+                "Bias": 12
+            },
+            {
+                "Dist": "TX-01",
+                "Bias": 25
+            },
+            {
+                "Dist": "TN-09",
+                "Bias": -23
+            },
+            {
+                "Dist": "TN-08",
+                "Bias": 21
+            },
+            {
+                "Dist": "TN-07",
+                "Bias": 10
+            },
+            {
+                "Dist": "TN-06",
+                "Bias": 17
+            },
+            {
+                "Dist": "TN-05",
+                "Bias": 8
+            },
+            {
+                "Dist": "TN-04",
+                "Bias": 21
+            },
+            {
+                "Dist": "TN-03",
+                "Bias": 18
+            },
+            {
+                "Dist": "TN-02",
+                "Bias": 17
+            },
+            {
+                "Dist": "TN-01",
+                "Bias": 29
+            },
+            {
+                "Dist": "SD-AL",
+                "Bias": 15
+            },
+            {
+                "Dist": "SC-07",
+                "Bias": 12
+            },
+            {
+                "Dist": "SC-06",
+                "Bias": -13
+            },
+            {
+                "Dist": "SC-05",
+                "Bias": 11
+            },
+            {
+                "Dist": "SC-04",
+                "Bias": 11
+            },
+            {
+                "Dist": "SC-03",
+                "Bias": 21
+            },
+            {
+                "Dist": "SC-02",
+                "Bias": 7
+            },
+            {
+                "Dist": "SC-01",
+                "Bias": 6
+            },
+            {
+                "Dist": "RI-02",
+                "Bias": -4
+            },
+            {
+                "Dist": "RI-01",
+                "Bias": -12
+            },
+            {
+                "Dist": "PA-17",
+                "Bias": -3
+            },
+            {
+                "Dist": "PA-16",
+                "Bias": 11
+            },
+            {
+                "Dist": "PA-15",
+                "Bias": 19
+            },
+            {
+                "Dist": "PA-14",
+                "Bias": 17
+            },
+            {
+                "Dist": "PA-13",
+                "Bias": 23
+            },
+            {
+                "Dist": "PA-12",
+                "Bias": -10
+            },
+            {
+                "Dist": "PA-11",
+                "Bias": 11
+            },
+            {
+                "Dist": "PA-10",
+                "Bias": 3
+            },
+            {
+                "Dist": "PA-09",
+                "Bias": 19
+            },
+            {
+                "Dist": "PA-08",
+                "Bias": 4
+            },
+            {
+                "Dist": "PA-07",
+                "Bias": 1
+            },
+            {
+                "Dist": "PA-06",
+                "Bias": -6
+            },
+            {
+                "Dist": "PA-05",
+                "Bias": -15
+            },
+            {
+                "Dist": "PA-04",
+                "Bias": -8
+            },
+            {
+                "Dist": "PA-03",
+                "Bias": -40
+            },
+            {
+                "Dist": "PA-02",
+                "Bias": -19
+            },
+            {
+                "Dist": "PA-01",
+                "Bias": -1
+            },
+            {
+                "Dist": "OR-06",
+                "Bias": -6
+            },
+            {
+                "Dist": "OR-05",
+                "Bias": -4
+            },
+            {
+                "Dist": "OR-04",
+                "Bias": -6
+            },
+            {
+                "Dist": "OR-03",
+                "Bias": -24
+            },
+            {
+                "Dist": "OR-02",
+                "Bias": 14
+            },
+            {
+                "Dist": "OR-01",
+                "Bias": -20
+            },
+            {
+                "Dist": "OK-05",
+                "Bias": 9
+            },
+            {
+                "Dist": "OK-04",
+                "Bias": 17
+            },
+            {
+                "Dist": "OK-03",
+                "Bias": 23
+            },
+            {
+                "Dist": "OK-02",
+                "Bias": 28
+            },
+            {
+                "Dist": "OK-01",
+                "Bias": 11
+            },
+            {
+                "Dist": "OH-15",
+                "Bias": 4
+            },
+            {
+                "Dist": "OH-14",
+                "Bias": 9
+            },
+            {
+                "Dist": "OH-13",
+                "Bias": 0
+            },
+            {
+                "Dist": "OH-12",
+                "Bias": 16
+            },
+            {
+                "Dist": "OH-11",
+                "Bias": -28
+            },
+            {
+                "Dist": "OH-10",
+                "Bias": 3
+            },
+            {
+                "Dist": "OH-09",
+                "Bias": 3
+            },
+            {
+                "Dist": "OH-08",
+                "Bias": 12
+            },
+            {
+                "Dist": "OH-07",
+                "Bias": 5
+            },
+            {
+                "Dist": "OH-06",
+                "Bias": 16
+            },
+            {
+                "Dist": "OH-05",
+                "Bias": 14
+            },
+            {
+                "Dist": "OH-04",
+                "Bias": 18
+            },
+            {
+                "Dist": "OH-03",
+                "Bias": -21
+            },
+            {
+                "Dist": "OH-02",
+                "Bias": 24
+            },
+            {
+                "Dist": "OH-01",
+                "Bias": -3
+            },
+            {
+                "Dist": "NY-26",
+                "Bias": -11
+            },
+            {
+                "Dist": "NY-25",
+                "Bias": -10
+            },
+            {
+                "Dist": "NY-24",
+                "Bias": 11
+            },
+            {
+                "Dist": "NY-23",
+                "Bias": 10
+            },
+            {
+                "Dist": "NY-22",
+                "Bias": -4
+            },
+            {
+                "Dist": "NY-21",
+                "Bias": 10
+            },
+            {
+                "Dist": "NY-20",
+                "Bias": -8
+            },
+            {
+                "Dist": "NY-19",
+                "Bias": -1
+            },
+            {
+                "Dist": "NY-18",
+                "Bias": -2
+            },
+            {
+                "Dist": "NY-17",
+                "Bias": -1
+            },
+            {
+                "Dist": "NY-16",
+                "Bias": -18
+            },
+            {
+                "Dist": "NY-15",
+                "Bias": -27
+            },
+            {
+                "Dist": "NY-14",
+                "Bias": -19
+            },
+            {
+                "Dist": "NY-13",
+                "Bias": -32
+            },
+            {
+                "Dist": "NY-12",
+                "Bias": -33
+            },
+            {
+                "Dist": "NY-11",
+                "Bias": 10
+            },
+            {
+                "Dist": "NY-10",
+                "Bias": -32
+            },
+            {
+                "Dist": "NY-09",
+                "Bias": -22
+            },
+            {
+                "Dist": "NY-08",
+                "Bias": -24
+            },
+            {
+                "Dist": "NY-07",
+                "Bias": -25
+            },
+            {
+                "Dist": "NY-06",
+                "Bias": -6
+            },
+            {
+                "Dist": "NY-05",
+                "Bias": -24
+            },
+            {
+                "Dist": "NY-04",
+                "Bias": -2
+            },
+            {
+                "Dist": "NY-03",
+                "Bias": 0
+            },
+            {
+                "Dist": "NY-02",
+                "Bias": 6
+            },
+            {
+                "Dist": "NY-01",
+                "Bias": 4
+            },
+            {
+                "Dist": "NV-04",
+                "Bias": -2
+            },
+            {
+                "Dist": "NV-03",
+                "Bias": -1
+            },
+            {
+                "Dist": "NV-02",
+                "Bias": 7
+            },
+            {
+                "Dist": "NV-01",
+                "Bias": -2
+            },
+            {
+                "Dist": "NM-03",
+                "Bias": -3
+            },
+            {
+                "Dist": "NM-02",
+                "Bias": 0
+            },
+            {
+                "Dist": "NM-01",
+                "Bias": -7
+            },
+            {
+                "Dist": "NJ-12",
+                "Bias": -13
+            },
+            {
+                "Dist": "NJ-11",
+                "Bias": -5
+            },
+            {
+                "Dist": "NJ-10",
+                "Bias": -27
+            },
+            {
+                "Dist": "NJ-09",
+                "Bias": -2
+            },
+            {
+                "Dist": "NJ-08",
+                "Bias": -15
+            },
+            {
+                "Dist": "NJ-07",
+                "Bias": 0
+            },
+            {
+                "Dist": "NJ-06",
+                "Bias": -5
+            },
+            {
+                "Dist": "NJ-05",
+                "Bias": -2
+            },
+            {
+                "Dist": "NJ-04",
+                "Bias": 14
+            },
+            {
+                "Dist": "NJ-03",
+                "Bias": -5
+            },
+            {
+                "Dist": "NJ-02",
+                "Bias": 5
+            },
+            {
+                "Dist": "NJ-01",
+                "Bias": -10
+            },
+            {
+                "Dist": "NH-02",
+                "Bias": -2
+            },
+            {
+                "Dist": "NH-01",
+                "Bias": -2
+            },
+            {
+                "Dist": "NE-03",
+                "Bias": 27
+            },
+            {
+                "Dist": "NE-02",
+                "Bias": -3
+            },
+            {
+                "Dist": "NE-01",
+                "Bias": 6
+            },
+            {
+                "Dist": "ND-AL",
+                "Bias": 18
+            },
+            {
+                "Dist": "NC-14",
+                "Bias": 8
+            },
+            {
+                "Dist": "NC-13",
+                "Bias": 8
+            },
+            {
+                "Dist": "NC-12",
+                "Bias": -24
+            },
+            {
+                "Dist": "NC-11",
+                "Bias": 5
+            },
+            {
+                "Dist": "NC-10",
+                "Bias": 9
+            },
+            {
+                "Dist": "NC-09",
+                "Bias": 8
+            },
+            {
+                "Dist": "NC-08",
+                "Bias": 10
+            },
+            {
+                "Dist": "NC-07",
+                "Bias": 7
+            },
+            {
+                "Dist": "NC-06",
+                "Bias": 9
+            },
+            {
+                "Dist": "NC-05",
+                "Bias": 9
+            },
+            {
+                "Dist": "NC-04",
+                "Bias": -23
+            },
+            {
+                "Dist": "NC-03",
+                "Bias": 10
+            },
+            {
+                "Dist": "NC-02",
+                "Bias": -17
+            },
+            {
+                "Dist": "NC-01",
+                "Bias": 1
+            },
+            {
+                "Dist": "MT-02",
+                "Bias": 15
+            },
+            {
+                "Dist": "MT-01",
+                "Bias": 5
+            },
+            {
+                "Dist": "MS-04",
+                "Bias": 21
+            },
+            {
+                "Dist": "MS-03",
+                "Bias": 14
+            },
+            {
+                "Dist": "MS-02",
+                "Bias": -11
+            },
+            {
+                "Dist": "MS-01",
+                "Bias": 18
+            },
+            {
+                "Dist": "MO-08",
+                "Bias": 27
+            },
+            {
+                "Dist": "MO-07",
+                "Bias": 21
+            },
+            {
+                "Dist": "MO-06",
+                "Bias": 19
+            },
+            {
+                "Dist": "MO-05",
+                "Bias": -12
+            },
+            {
+                "Dist": "MO-04",
+                "Bias": 21
+            },
+            {
+                "Dist": "MO-03",
+                "Bias": 13
+            },
+            {
+                "Dist": "MO-02",
+                "Bias": 4
+            },
+            {
+                "Dist": "MO-01",
+                "Bias": -29
+            },
+            {
+                "Dist": "MN-08",
+                "Bias": 7
+            },
+            {
+                "Dist": "MN-07",
+                "Bias": 18
+            },
+            {
+                "Dist": "MN-06",
+                "Bias": 10
+            },
+            {
+                "Dist": "MN-05",
+                "Bias": -32
+            },
+            {
+                "Dist": "MN-04",
+                "Bias": -18
+            },
+            {
+                "Dist": "MN-03",
+                "Bias": -11
+            },
+            {
+                "Dist": "MN-02",
+                "Bias": -3
+            },
+            {
+                "Dist": "MN-01",
+                "Bias": 6
+            },
+            {
+                "Dist": "MI-13",
+                "Bias": -22
+            },
+            {
+                "Dist": "MI-12",
+                "Bias": -21
+            },
+            {
+                "Dist": "MI-11",
+                "Bias": -9
+            },
+            {
+                "Dist": "MI-10",
+                "Bias": 3
+            },
+            {
+                "Dist": "MI-09",
+                "Bias": 16
+            },
+            {
+                "Dist": "MI-08",
+                "Bias": 1
+            },
+            {
+                "Dist": "MI-07",
+                "Bias": 0
+            },
+            {
+                "Dist": "MI-06",
+                "Bias": -12
+            },
+            {
+                "Dist": "MI-05",
+                "Bias": 13
+            },
+            {
+                "Dist": "MI-04",
+                "Bias": 3
+            },
+            {
+                "Dist": "MI-03",
+                "Bias": -4
+            },
+            {
+                "Dist": "MI-02",
+                "Bias": 15
+            },
+            {
+                "Dist": "MI-01",
+                "Bias": 11
+            },
+            {
+                "Dist": "ME-02",
+                "Bias": 4
+            },
+            {
+                "Dist": "ME-01",
+                "Bias": -11
+            },
+            {
+                "Dist": "MD-08",
+                "Bias": -30
+            },
+            {
+                "Dist": "MD-07",
+                "Bias": -31
+            },
+            {
+                "Dist": "MD-06",
+                "Bias": -3
+            },
+            {
+                "Dist": "MD-05",
+                "Bias": -17
+            },
+            {
+                "Dist": "MD-04",
+                "Bias": -39
+            },
+            {
+                "Dist": "MD-03",
+                "Bias": -12
+            },
+            {
+                "Dist": "MD-02",
+                "Bias": -10
+            },
+            {
+                "Dist": "MD-01",
+                "Bias": 8
+            },
+            {
+                "Dist": "MA-09",
+                "Bias": -6
+            },
+            {
+                "Dist": "MA-08",
+                "Bias": -15
+            },
+            {
+                "Dist": "MA-07",
+                "Bias": -34
+            },
+            {
+                "Dist": "MA-06",
+                "Bias": -11
+            },
+            {
+                "Dist": "MA-05",
+                "Bias": -24
+            },
+            {
+                "Dist": "MA-04",
+                "Bias": -11
+            },
+            {
+                "Dist": "MA-03",
+                "Bias": -11
+            },
+            {
+                "Dist": "MA-02",
+                "Bias": -13
+            },
+            {
+                "Dist": "MA-01",
+                "Bias": -8
+            },
+            {
+                "Dist": "LA-06",
+                "Bias": -8
+            },
+            {
+                "Dist": "LA-05",
+                "Bias": 18
+            },
+            {
+                "Dist": "LA-04",
+                "Bias": 26
+            },
+            {
+                "Dist": "LA-03",
+                "Bias": 22
+            },
+            {
+                "Dist": "LA-02",
+                "Bias": -17
+            },
+            {
+                "Dist": "LA-01",
+                "Bias": 19
+            },
+            {
+                "Dist": "KY-06",
+                "Bias": 7
+            },
+            {
+                "Dist": "KY-05",
+                "Bias": 32
+            },
+            {
+                "Dist": "KY-04",
+                "Bias": 18
+            },
+            {
+                "Dist": "KY-03",
+                "Bias": -10
+            },
+            {
+                "Dist": "KY-02",
+                "Bias": 20
+            },
+            {
+                "Dist": "KY-01",
+                "Bias": 23
+            },
+            {
+                "Dist": "KS-04",
+                "Bias": 12
+            },
+            {
+                "Dist": "KS-03",
+                "Bias": -2
+            },
+            {
+                "Dist": "KS-02",
+                "Bias": 10
+            },
+            {
+                "Dist": "KS-01",
+                "Bias": 16
+            },
+            {
+                "Dist": "IN-09",
+                "Bias": 15
+            },
+            {
+                "Dist": "IN-08",
+                "Bias": 18
+            },
+            {
+                "Dist": "IN-07",
+                "Bias": -21
+            },
+            {
+                "Dist": "IN-06",
+                "Bias": 16
+            },
+            {
+                "Dist": "IN-05",
+                "Bias": 8
+            },
+            {
+                "Dist": "IN-04",
+                "Bias": 15
+            },
+            {
+                "Dist": "IN-03",
+                "Bias": 16
+            },
+            {
+                "Dist": "IN-02",
+                "Bias": 13
+            },
+            {
+                "Dist": "IN-01",
+                "Bias": -1
+            },
+            {
+                "Dist": "IL-17",
+                "Bias": -3
+            },
+            {
+                "Dist": "IL-16",
+                "Bias": 11
+            },
+            {
+                "Dist": "IL-15",
+                "Bias": 20
+            },
+            {
+                "Dist": "IL-14",
+                "Bias": -3
+            },
+            {
+                "Dist": "IL-13",
+                "Bias": -5
+            },
+            {
+                "Dist": "IL-12",
+                "Bias": 22
+            },
+            {
+                "Dist": "IL-11",
+                "Bias": -6
+            },
+            {
+                "Dist": "IL-10",
+                "Bias": -12
+            },
+            {
+                "Dist": "IL-09",
+                "Bias": -19
+            },
+            {
+                "Dist": "IL-08",
+                "Bias": -5
+            },
+            {
+                "Dist": "IL-07",
+                "Bias": -34
+            },
+            {
+                "Dist": "IL-06",
+                "Bias": -3
+            },
+            {
+                "Dist": "IL-05",
+                "Bias": -19
+            },
+            {
+                "Dist": "IL-04",
+                "Bias": -17
+            },
+            {
+                "Dist": "IL-03",
+                "Bias": -17
+            },
+            {
+                "Dist": "IL-02",
+                "Bias": -18
+            },
+            {
+                "Dist": "IL-01",
+                "Bias": -18
+            },
+            {
+                "Dist": "ID-02",
+                "Bias": 13
+            },
+            {
+                "Dist": "ID-01",
+                "Bias": 22
+            },
+            {
+                "Dist": "IA-04",
+                "Bias": 15
+            },
+            {
+                "Dist": "IA-03",
+                "Bias": 2
+            },
+            {
+                "Dist": "IA-02",
+                "Bias": 4
+            },
+            {
+                "Dist": "IA-01",
+                "Bias": 4
+            },
+            {
+                "Dist": "HI-02",
+                "Bias": -12
+            },
+            {
+                "Dist": "HI-01",
+                "Bias": -13
+            },
+            {
+                "Dist": "GA-14",
+                "Bias": 19
+            },
+            {
+                "Dist": "GA-13",
+                "Bias": -21
+            },
+            {
+                "Dist": "GA-12",
+                "Bias": 7
+            },
+            {
+                "Dist": "GA-11",
+                "Bias": 12
+            },
+            {
+                "Dist": "GA-10",
+                "Bias": 11
+            },
+            {
+                "Dist": "GA-09",
+                "Bias": 17
+            },
+            {
+                "Dist": "GA-08",
+                "Bias": 15
+            },
+            {
+                "Dist": "GA-07",
+                "Bias": 11
+            },
+            {
+                "Dist": "GA-06",
+                "Bias": -25
+            },
+            {
+                "Dist": "GA-05",
+                "Bias": -36
+            },
+            {
+                "Dist": "GA-04",
+                "Bias": -27
+            },
+            {
+                "Dist": "GA-03",
+                "Bias": 15
+            },
+            {
+                "Dist": "GA-02",
+                "Bias": -4
+            },
+            {
+                "Dist": "GA-01",
+                "Bias": 8
+            },
+            {
+                "Dist": "FL-28",
+                "Bias": 10
+            },
+            {
+                "Dist": "FL-27",
+                "Bias": 6
+            },
+            {
+                "Dist": "FL-26",
+                "Bias": 16
+            },
+            {
+                "Dist": "FL-25",
+                "Bias": -5
+            },
+            {
+                "Dist": "FL-24",
+                "Bias": -18
+            },
+            {
+                "Dist": "FL-23",
+                "Bias": -2
+            },
+            {
+                "Dist": "FL-22",
+                "Bias": -4
+            },
+            {
+                "Dist": "FL-21",
+                "Bias": 7
+            },
+            {
+                "Dist": "FL-20",
+                "Bias": -22
+            },
+            {
+                "Dist": "FL-19",
+                "Bias": 14
+            },
+            {
+                "Dist": "FL-18",
+                "Bias": 14
+            },
+            {
+                "Dist": "FL-17",
+                "Bias": 11
+            },
+            {
+                "Dist": "FL-16",
+                "Bias": 7
+            },
+            {
+                "Dist": "FL-15",
+                "Bias": 5
+            },
+            {
+                "Dist": "FL-14",
+                "Bias": -5
+            },
+            {
+                "Dist": "FL-13",
+                "Bias": 5
+            },
+            {
+                "Dist": "FL-12",
+                "Bias": 17
+            },
+            {
+                "Dist": "FL-11",
+                "Bias": 8
+            },
+            {
+                "Dist": "FL-10",
+                "Bias": -13
+            },
+            {
+                "Dist": "FL-09",
+                "Bias": -4
+            },
+            {
+                "Dist": "FL-08",
+                "Bias": 11
+            },
+            {
+                "Dist": "FL-07",
+                "Bias": 5
+            },
+            {
+                "Dist": "FL-06",
+                "Bias": 14
+            },
+            {
+                "Dist": "FL-05",
+                "Bias": 10
+            },
+            {
+                "Dist": "FL-04",
+                "Bias": 5
+            },
+            {
+                "Dist": "FL-03",
+                "Bias": 10
+            },
+            {
+                "Dist": "FL-02",
+                "Bias": 8
+            },
+            {
+                "Dist": "FL-01",
+                "Bias": 18
+            },
+            {
+                "Dist": "DE-AL",
+                "Bias": -8
+            },
+            {
+                "Dist": "CT-05",
+                "Bias": -3
+            },
+            {
+                "Dist": "CT-04",
+                "Bias": -13
+            },
+            {
+                "Dist": "CT-03",
+                "Bias": -8
+            },
+            {
+                "Dist": "CT-02",
+                "Bias": -4
+            },
+            {
+                "Dist": "CT-01",
+                "Bias": -12
+            },
+            {
+                "Dist": "CO-08",
+                "Bias": 0
+            },
+            {
+                "Dist": "CO-07",
+                "Bias": -8
+            },
+            {
+                "Dist": "CO-06",
+                "Bias": -11
+            },
+            {
+                "Dist": "CO-05",
+                "Bias": 5
+            },
+            {
+                "Dist": "CO-04",
+                "Bias": 9
+            },
+            {
+                "Dist": "CO-03",
+                "Bias": 5
+            },
+            {
+                "Dist": "CO-02",
+                "Bias": -20
+            },
+            {
+                "Dist": "CO-01",
+                "Bias": -29
+            },
+            {
+                "Dist": "CA-52",
+                "Bias": -13
+            },
+            {
+                "Dist": "CA-51",
+                "Bias": -13
+            },
+            {
+                "Dist": "CA-50",
+                "Bias": -16
+            },
+            {
+                "Dist": "CA-49",
+                "Bias": -4
+            },
+            {
+                "Dist": "CA-48",
+                "Bias": 7
+            },
+            {
+                "Dist": "CA-47",
+                "Bias": -3
+            },
+            {
+                "Dist": "CA-46",
+                "Bias": -11
+            },
+            {
+                "Dist": "CA-45",
+                "Bias": -1
+            },
+            {
+                "Dist": "CA-44",
+                "Bias": -19
+            },
+            {
+                "Dist": "CA-43",
+                "Bias": -27
+            },
+            {
+                "Dist": "CA-42",
+                "Bias": -18
+            },
+            {
+                "Dist": "CA-41",
+                "Bias": 2
+            },
+            {
+                "Dist": "CA-40",
+                "Bias": 1
+            },
+            {
+                "Dist": "CA-39",
+                "Bias": -7
+            },
+            {
+                "Dist": "CA-38",
+                "Bias": -10
+            },
+            {
+                "Dist": "CA-37",
+                "Bias": -33
+            },
+            {
+                "Dist": "CA-36",
+                "Bias": -21
+            },
+            {
+                "Dist": "CA-35",
+                "Bias": -8
+            },
+            {
+                "Dist": "CA-34",
+                "Bias": -28
+            },
+            {
+                "Dist": "CA-33",
+                "Bias": -7
+            },
+            {
+                "Dist": "CA-32",
+                "Bias": -17
+            },
+            {
+                "Dist": "CA-31",
+                "Bias": -10
+            },
+            {
+                "Dist": "CA-30",
+                "Bias": -22
+            },
+            {
+                "Dist": "CA-29",
+                "Bias": -20
+            },
+            {
+                "Dist": "CA-28",
+                "Bias": -15
+            },
+            {
+                "Dist": "CA-27",
+                "Bias": -3
+            },
+            {
+                "Dist": "CA-26",
+                "Bias": -8
+            },
+            {
+                "Dist": "CA-25",
+                "Bias": -3
+            },
+            {
+                "Dist": "CA-24",
+                "Bias": -13
+            },
+            {
+                "Dist": "CA-23",
+                "Bias": 8
+            },
+            {
+                "Dist": "CA-22",
+                "Bias": 1
+            },
+            {
+                "Dist": "CA-21",
+                "Bias": -4
+            },
+            {
+                "Dist": "CA-20",
+                "Bias": 15
+            },
+            {
+                "Dist": "CA-19",
+                "Bias": -18
+            },
+            {
+                "Dist": "CA-18",
+                "Bias": -17
+            },
+            {
+                "Dist": "CA-17",
+                "Bias": -21
+            },
+            {
+                "Dist": "CA-16",
+                "Bias": -26
+            },
+            {
+                "Dist": "CA-15",
+                "Bias": -26
+            },
+            {
+                "Dist": "CA-14",
+                "Bias": -20
+            },
+            {
+                "Dist": "CA-13",
+                "Bias": 1
+            },
+            {
+                "Dist": "CA-12",
+                "Bias": -39
+            },
+            {
+                "Dist": "CA-11",
+                "Bias": -36
+            },
+            {
+                "Dist": "CA-10",
+                "Bias": -18
+            },
+            {
+                "Dist": "CA-09",
+                "Bias": -1
+            },
+            {
+                "Dist": "CA-08",
+                "Bias": -24
+            },
+            {
+                "Dist": "CA-07",
+                "Bias": -16
+            },
+            {
+                "Dist": "CA-06",
+                "Bias": -8
+            },
+            {
+                "Dist": "CA-05",
+                "Bias": 8
+            },
+            {
+                "Dist": "CA-04",
+                "Bias": -17
+            },
+            {
+                "Dist": "CA-03",
+                "Bias": 2
+            },
+            {
+                "Dist": "CA-02",
+                "Bias": -24
+            },
+            {
+                "Dist": "CA-01",
+                "Bias": 12
+            },
+            {
+                "Dist": "AZ-09",
+                "Bias": 15
+            },
+            {
+                "Dist": "AZ-08",
+                "Bias": 8
+            },
+            {
+                "Dist": "AZ-07",
+                "Bias": -13
+            },
+            {
+                "Dist": "AZ-06",
+                "Bias": 0
+            },
+            {
+                "Dist": "AZ-05",
+                "Bias": 10
+            },
+            {
+                "Dist": "AZ-04",
+                "Bias": -4
+            },
+            {
+                "Dist": "AZ-03",
+                "Bias": -22
+            },
+            {
+                "Dist": "AZ-02",
+                "Bias": 7
+            },
+            {
+                "Dist": "AZ-01",
+                "Bias": 1
+            },
+            {
+                "Dist": "AR-04",
+                "Bias": 20
+            },
+            {
+                "Dist": "AR-03",
+                "Bias": 13
+            },
+            {
+                "Dist": "AR-02",
+                "Bias": 8
+            },
+            {
+                "Dist": "AR-01",
+                "Bias": 23
+            },
+            {
+                "Dist": "AL-07",
+                "Bias": -13
+            },
+            {
+                "Dist": "AL-06",
+                "Bias": 20
+            },
+            {
+                "Dist": "AL-05",
+                "Bias": 15
+            },
+            {
+                "Dist": "AL-04",
+                "Bias": 33
+            },
+            {
+                "Dist": "AL-03",
+                "Bias": 23
+            },
+            {
+                "Dist": "AL-02",
+                "Bias": -5
+            },
+            {
+                "Dist": "AL-01",
+                "Bias": 27
+            },
+            {
+                "Dist": "AK-AL",
+                "Bias": 6
+            }
+        ]
+        const justBias = districtBiases.map(d => d.Bias)
+
+        function loadStates(signals) {
+            console.log(signals)
+            const params = new URLSearchParams(window.location.search)
+            signals.state1 = params.get('state1') || 'TX'
+            signals.state2 = params.get('state2') || 'CA'
+        }
+    </script>
+</head>
+
+
+
+<main class="container" data-on-load="loadStates($)">
+    <div data-signals-show-bias="true" data-signals-state="'TX'" class="district-container"
+        data-signals-national-outcome="0" data-computed-results="Array.from({length: 435}, () => $nationalOutcome)">
+        <div class="district-container district-container-with-election-list">
+            <div>
+                <div class="group">
+                    <h3><span data-text="$state1"></span> 2024 Districts </h3>
+                    <div class="r-d-section">
+                        <div>R <span
+                                data-text="districtBiases.filter(d => d.Dist.startsWith($state1) && d.Bias + $results[0] > 0).length"></span>
+                        </div>
+                        <div>D <span
+                                data-text="districtBiases.filter(d => d.Dist.startsWith($state1) && d.Bias + $results[0] <= 0).length"></span>
+                        </div>
+                    </div>
+                </div>
+                <election-list
+                    data-attr-biases="districtBiases.filter(d => d.Dist.startsWith($state1)).map(d => d.Bias).sort((a, b) => a - b)"
+                    data-attr-outcomes="$results" data-attr-showBias="$showBias"></election-list>
+            </div>
+            <div>
+                <div class="group">
+                    <h3><span data-text="$state2"></span> 2024 Districts </h3>
+                    <div class="r-d-section">
+                        <div>R <span
+                                data-text="districtBiases.filter(d => d.Dist.startsWith($state2) && d.Bias + $results[0] > 0).length"></span>
+                        </div>
+                        <div>D <span
+                                data-text="districtBiases.filter(d => d.Dist.startsWith($state2) && d.Bias + $results[0] <= 0).length"></span>
+                        </div>
+                    </div>
+                </div>
+                <election-list
+                    data-attr-biases="districtBiases.filter(d => d.Dist.startsWith($state2)).map(d => d.Bias).sort((a, b) => a - b)"
+                    data-attr-outcomes="$results" data-attr-showBias="$showBias"></election-list>
+            </div>
+            <!-- <election-list style="--district-size:10px; --election-list-gap: 1px;" data-attr-outcomes="$results" data-attr-biases="$biases" data-attr-showBias="$showBias"></election-list> -->
+            <div>
+                <h3>National Feeling</h3>
+                <div>You can think of this as the generic ballot for the entire country.</div>
+                <input data-bind-national-outcome type="range" min="-20" max="20" value="0" step="1">
+                <div><span data-text="$nationalOutcome > 0 ? 'R' : 'D'"></span>+<span
+                        data-text="Math.abs($nationalOutcome)"></span></div>
+                <div style="display: none">
+                    <h6>R <span data-text="justBias.filter(b => b+$results[0] > 0).length"></span></h6>
+                    <h6>D <span data-text="justBias.filter(b => b+$results[0] <= 0).length"></span></h6>
+                    <election-list style="--district-size:10px; --election-list-gap: 1px;"
+                        data-attr-biases="justBias.sort((a, b) => a - b)" data-attr-outcomes="$results"
+                        data-attr-showBias="true"></election-list>
+                </div>
+            </div>
+        </div>
+        <div class="district-container-label">
+
+        </div>
+
+    </div>
+</main>
+
+
+
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
