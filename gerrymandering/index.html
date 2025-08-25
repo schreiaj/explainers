@@ -1802,9 +1802,9 @@
 
         function loadStates(signals) {
             const params = new URLSearchParams(window.location.search)
-            signals.state1 = params.get('state1') || 'TX'
-            signals.state2 = params.get('state2') || 'CA'
-            signals.nationalOutcome =params.get('nationalOutcome')
+            signals.state1 = params.get('state1').toUpperCase() || 'TX'
+            signals.state2 = params.get('state2').toUpperCase() || 'CA'
+            signals.nationalOutcome = parseInt(params.get('nationalOutcome')) || 0
         }
     </script>
 </head>
